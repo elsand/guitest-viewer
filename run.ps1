@@ -4,6 +4,7 @@ Add-Type -AssemblyName System.Windows.Forms
 $viewer = "C:\Program Files\RealVNC\VNC Viewer\vncviewer.exe"
 $processname = "vncviewer"
 $devicename = "\\.\DISPLAY2"
+$modaldialogtitle = "VNC Viewer"
 $windows_per_row = 3
 
 
@@ -16,7 +17,8 @@ $dockers = @{
     chrome6 = "10.30.10.20:49343"
     chrome7 = "10.30.10.20:49344"
     chrome8 = "10.30.10.20:49345"
-    <#  
+
+    <#
     test1 = "127.0.0.1:5901"
     test2 = "127.0.0.1:5901"
     test3 = "127.0.0.1:5901"
@@ -44,6 +46,7 @@ Function clamp($value) {
 }
 
 $display = [System.Windows.Forms.Screen]::AllScreens | Where-Object { $_.DeviceName -eq $devicename }
+$wshell = New-Object -ComObject wscript.shell;
 
 $leftfix = -3;
 $topfix = -3;
@@ -73,6 +76,12 @@ try {
             else {
                 #echo "$_ is already opened"
             }
+        }
+
+        # If any VNC processes have a modal dialog open, send an ENTER to close it. This closes VNC viewer if connection failed for any reason
+        while ($wshell.AppActivate($modaldialogtitle)) {
+            echo "Closing modal to restart VNC"
+            [System.Windows.Forms.SendKeys]::SendWait('{Enter}')
         }
 
 
